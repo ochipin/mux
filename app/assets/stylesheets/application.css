@@ -1,0 +1,6 @@
+@charset "{{charset}}";
+
+/*= {{import "stylesheets/default.css"}} */
+
+/*= {{$f := sprintf "stylesheets/%s/%s.css" controller action}} */
+/*= {{if hastemplate $f.Lower}}{{import $f}}{{end}} */

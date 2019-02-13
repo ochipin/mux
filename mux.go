@@ -394,26 +394,22 @@ func (mux *Mux) ExecAction(w http.ResponseWriter, r *http.Request, v *Values, he
 	return out[0].Interface()
 }
 
-// RoutePath : アクセスされたクエリパスから該当するルーティング情報を取得する
+// RoutePath : アクセスされたクエリパスから該当するアクションを取得する
 func (mux *Mux) RoutePath(r *http.Request) (router.Result, []reflect.Value, error) {
-	mux.Log.Debug("BEGIN")
-	// アクセスされたクエリパスに該当するルーティング情報を取得する
+	// アクセスされたクエリパスに該当するアクションを取得する
 	res, args, err := mux.Router.Caller(r.Method, r.URL.Path)
-	// ルーティング情報が存在しない場合は、"*" での登録がないかチェックする
-	if err != nil {
-		var err2 error
-		res, args, err2 = mux.Router.Caller("*", r.URL.Path)
-		// "*" 登録すらない場合は、エラーを返却する
-		if err2 != nil {
-			return nil, nil, err
-		}
-		mux.Log.Debugf("method is *, query path %s found", r.URL.Path)
-	} else {
-		mux.Log.Debug("[%s] %s found", r.URL.Path)
+	// アクション取得成功の場合、アクションの情報を返却する
+	if err == nil {
+		return res, args, nil
 	}
-	mux.Log.Debug("END")
-	// ルーティング情報を返却する
-	return res, args, err
+
+	// 該当するアクションが見つからない場合、"*" で登録されたクエリパスがないか確認する
+	if res, args, err := mux.Router.Caller("*", r.URL.Path); err == nil {
+		return res, args, nil
+	}
+
+	// ルーティングテーブルから該当するアクションが見つからない場合は、エラーを返却する
+	return nil, nil, err
 }
 
 // I18n : Accept-Languageを使用して多言語情報を取得する

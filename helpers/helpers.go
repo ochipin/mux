@@ -3,6 +3,7 @@ package helpers
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -345,23 +346,23 @@ func (cmd *Helpers) Env(name string) StringType {
 
 // Stylesheet : <link rel='stylesheet' ... タグを埋め込む
 func (cmd *Helpers) Stylesheet(path string) string {
-	if path == "" {
-		return ""
-	}
+	path = filepath.Join(cmd.BaseURL, path)
+	// リンクIDがない場合、idクエリパラメータなしの <link>を生成する
 	if cmd.LinkID == "" {
 		return fmt.Sprintf("<link rel='stylesheet' type='text/css' href='%s' />", path)
 	}
+	// リンクIDが存在する場合、idクエリパラメータにリンクIDを付与する
 	return fmt.Sprintf("<link rel='stylesheet' type='text/css' href='%s?id=%s' />", path, cmd.LinkID)
 }
 
 // Script : <script src='...' タグを埋め込む
 func (cmd *Helpers) Script(path string) string {
-	if path == "" {
-		return ""
-	}
+	path = filepath.Join(cmd.BaseURL, path)
+	// リンクIDがない場合、idクエリパラメータなしの <link>を生成する
 	if cmd.LinkID == "" {
 		return fmt.Sprintf("<script src='%s'></script>", path)
 	}
+	// リンクIDが存在する場合、idクエリパラメータにリンクIDを付与する
 	return fmt.Sprintf("<script src='%s?id=%s'></script>", path, cmd.LinkID)
 }
 

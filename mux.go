@@ -418,8 +418,16 @@ func (mux *Mux) ExecAction(w http.ResponseWriter, r *http.Request, v *Values, he
 // RoutePath : アクセスされたクエリパスから該当するアクションを取得する
 func (mux *Mux) RoutePath(r *http.Request) (router.Result, []reflect.Value, error) {
 	var path = r.URL.Path
+	// 先頭のクエリパスがBaseURLで設定したパスではない場合、エラーを返却する
+	if strings.Index(path, mux.BaseURL) != 0 {
+		return nil, nil, &router.NotRoutes{
+			Message: fmt.Sprintf("'[%s]: %s' - not found", r.Method, r.URL.Path),
+			Path:    r.URL.Path,
+			Method:  r.Method,
+		}
+	}
 	// /baseurl/path/to/url => /path/to/url へ変換する
-	if mux.BaseURL != "/" && strings.Index(path, mux.BaseURL) == 0 {
+	if mux.BaseURL != "/" {
 		path = path[len(mux.BaseURL):]
 		if path == "" {
 			path = "/"

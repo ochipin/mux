@@ -424,6 +424,9 @@ func (mux *Mux) RoutePath(r *http.Request) (router.Result, []reflect.Value, erro
 		if path == "" {
 			path = "/"
 		}
+		if path[0] != '/' {
+			path = r.URL.Path
+		}
 	}
 	// アクセスされたクエリパスに該当するアクションを取得する
 	res, args, err := mux.Router.Caller(r.Method, path)

@@ -139,8 +139,17 @@ func (mux *Mux) New() (http.Handler, error) {
 	}
 
 	// BaseURL が未登録の場合は、'/' が BaseURL とする
+	mux.BaseURL = strings.Trim(mux.BaseURL, " ")
 	if mux.BaseURL == "" {
 		mux.BaseURL = "/"
+	}
+	// 先頭に'/'が付与されていない場合は付与する
+	if mux.BaseURL[0] != '/' {
+		mux.BaseURL = "/" + mux.BaseURL
+	}
+	// 最後尾の'/'は除外する
+	if mux.BaseURL != "/" {
+		mux.BaseURL = strings.TrimRight(mux.BaseURL, "/")
 	}
 
 	// ヘルパが未登録の場合、デフォルトのヘルパ設定を登録する
@@ -165,6 +174,18 @@ func (mux *Mux) New() (http.Handler, error) {
 func (mux *Mux) Main(w http.ResponseWriter, r *http.Request, refer basemux.Referer, v *basemux.Values) (basemux.Render, error) {
 	mux.Log.Debug("BEGIN")
 	var err error
+
+	// アクセスが '/' の場合のみ、BaseURLの確認を行う
+	if r.URL.Path == "/" {
+		// BaseURL が '/' のみではない場合、BaseURLへリダイレクトする
+		if mux.BaseURL != "/" {
+			return &Render{
+				Path:       mux.BaseURL,
+				StatusCode: 302,
+			}, nil
+		}
+	}
+
 	// 最後に、Commitをコール
 	defer func() {
 		if e := mux.Trigger.Commit(w, r, v); e != nil {
@@ -396,15 +417,23 @@ func (mux *Mux) ExecAction(w http.ResponseWriter, r *http.Request, v *Values, he
 
 // RoutePath : アクセスされたクエリパスから該当するアクションを取得する
 func (mux *Mux) RoutePath(r *http.Request) (router.Result, []reflect.Value, error) {
+	var path = r.URL.Path
+	// /baseurl/path/to/url => /path/to/url へ変換する
+	if mux.BaseURL != "/" {
+		path = strings.TrimLeft(path, mux.BaseURL)
+		if path == "" {
+			path = "/"
+		}
+	}
 	// アクセスされたクエリパスに該当するアクションを取得する
-	res, args, err := mux.Router.Caller(r.Method, r.URL.Path)
+	res, args, err := mux.Router.Caller(r.Method, path)
 	// アクション取得成功の場合、アクションの情報を返却する
 	if err == nil {
 		return res, args, nil
 	}
 
 	// 該当するアクションが見つからない場合、"*" で登録されたクエリパスがないか確認する
-	if res, args, err := mux.Router.Caller("*", r.URL.Path); err == nil {
+	if res, args, err := mux.Router.Caller("*", path); err == nil {
 		return res, args, nil
 	}
 

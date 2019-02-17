@@ -419,8 +419,8 @@ func (mux *Mux) ExecAction(w http.ResponseWriter, r *http.Request, v *Values, he
 func (mux *Mux) RoutePath(r *http.Request) (router.Result, []reflect.Value, error) {
 	var path = r.URL.Path
 	// /baseurl/path/to/url => /path/to/url へ変換する
-	if mux.BaseURL != "/" {
-		path = strings.TrimLeft(path, mux.BaseURL)
+	if mux.BaseURL != "/" && strings.Index(path, mux.BaseURL) == 0 {
+		path = path[len(mux.BaseURL):]
 		if path == "" {
 			path = "/"
 		}

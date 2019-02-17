@@ -229,7 +229,7 @@ func (mux *Mux) CallAction(w http.ResponseWriter, r *http.Request, v *Values) in
 		LangData:     mux.I18n(r, "", ""),
 		SubmitMethod: r.Method,
 	}
-	v.Set("defaultHelper", helper)
+	v.Set("defaultHelper", mux.Trigger.SetHelper(helper))
 	mux.Log.Debug("default helper created.")
 
 	// アクションを実行し、実行結果を判定する
@@ -349,7 +349,7 @@ func (mux *Mux) ExecAction(w http.ResponseWriter, r *http.Request, v *Values, he
 	helper.LangData = langdata
 	helper.LinkID = linkid
 	// 独自ヘルパを設定
-	v.Set("defaultHelper", mux.Trigger.SetHelper(helper))
+	// v.Set("defaultHelper", mux.Trigger.SetHelper(helper))
 	mux.Log.Debug("helpers.Helper parameters set complete")
 
 	// 基本コントローラを生成

@@ -682,11 +682,14 @@ func (mux *Mux) Error(err error, res http.ResponseWriter, req *http.Request) {
 		for i := 0; i < len(root); i++ {
 			if types.Line-1 == i {
 				root[i] = "<li class='alert'>" + root[i] + "</li>"
+			} else {
+				root[i] = "<li>" + root[i] + "</li>"
 			}
 		}
 		// エラー情報をInterfaceメンバへ格納
 		status.Interface = map[string]interface{}{
 			"basename": types.Basename,
+			"message":  err.Error(),
 			"line":     types.Line,
 			"root":     root,
 		}

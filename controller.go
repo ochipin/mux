@@ -59,6 +59,11 @@ func (c *Controller) Query() url.Values {
 	return c.r.URL.Query()
 }
 
+// I18n : 言語設定パラメータの値を取得する
+func (c *Controller) I18n(name string) string {
+	return fmt.Sprint(c.locale.T(name))
+}
+
 // Render : HTML/TEXT/JSON のいずれかを表示する
 func (c *Controller) Render() *RenderTemplate {
 	return &RenderTemplate{

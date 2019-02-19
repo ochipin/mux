@@ -1,6 +1,7 @@
 package mux
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -28,6 +29,7 @@ func (c *Example) Hello() Result {
 }
 
 func (c *Example) World() Result {
+	fmt.Println(c.I18n("sample"))
 	return c.Render().Template("example/%s", "world")
 }
 

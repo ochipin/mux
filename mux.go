@@ -476,7 +476,11 @@ func (mux *Mux) I18n(r *http.Request, ctlname, actname string) locale.Data {
 	mux.Log.Debugf("'%s.%s' is '%s' language used", ctlname, actname, langname)
 	mux.Log.Debug("END")
 	// l1 + l2 のマージした情報を返却する
-	return locale.Merge(l1, l2)
+	mergedata := locale.Merge(l1, l2)
+	if mergedata != nil {
+		mergedata = make(locale.Data)
+	}
+	return mergedata
 }
 
 // Render : basemux.Render を生成する

@@ -103,3 +103,14 @@ type CommitError struct {
 func (err *CommitError) Error() string {
 	return err.Message
 }
+
+// AccessDenied : IP制限に引っかかった場合のエラー
+type AccessDenied struct {
+	Message    string
+	StatusCode int
+	IP         string
+}
+
+func (err *AccessDenied) Error() string {
+	return err.Message
+}

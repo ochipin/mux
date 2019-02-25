@@ -39,6 +39,7 @@ type Mux struct {
 	BaseURL     string                  // ベースとなるURLデフォルトは'/'
 	ContentList map[string]string       // コンテンツリスト
 	Helpers     interface{}             // ヘルパ
+	RestrictIP  RestrictIP              // IP制限
 	Trigger     Trigger                 // トリガ
 }
 
@@ -160,6 +161,16 @@ func (mux *Mux) New() (http.Handler, error) {
 	types := reflect.TypeOf(mux.Helpers)
 	if types.Kind() != reflect.Struct {
 		return nil, fmt.Errorf("'Helpers' parameter type not struct")
+	}
+
+	// IP制限設定をされている場合、IPNetを初期化する
+	if mux.RestrictIP == nil {
+		mux.RestrictIP = RestrictIP{}
+	}
+	if mux.RestrictIP != nil {
+		if err := mux.RestrictIP.MakeIPNet(); err != nil {
+			return nil, err
+		}
 	}
 
 	// トリガ未設定の場合は、空トリガを記憶させる
@@ -436,6 +447,21 @@ func (mux *Mux) RoutePath(r *http.Request) (router.Result, []reflect.Value, erro
 			path = r.URL.Path
 		}
 	}
+
+	// IP 制限がかかっていないか確認する
+	var addr string
+	idx := strings.Index(r.RemoteAddr, ":")
+	if idx != -1 {
+		addr = r.RemoteAddr[:idx]
+	}
+	if mux.RestrictIP.Contains(path, addr) == false {
+		return nil, nil, &AccessDenied{
+			Message:    "access forbidden by rule, client: " + addr,
+			IP:         addr,
+			StatusCode: 403,
+		}
+	}
+
 	// アクセスされたクエリパスに該当するアクションを取得する
 	res, args, err := mux.Router.Caller(r.Method, path)
 	// アクション取得成功の場合、アクションの情報を返却する
@@ -606,6 +632,12 @@ func (mux *Mux) Error(err error, res http.ResponseWriter, req *http.Request) {
 	}
 
 	switch types := err.(type) {
+	// IP制限に引っかかった際のエラー
+	case *AccessDenied:
+		status.Title = "403 Forbidden"
+		status.StatusCode = types.StatusCode
+		status.ErrorTitle = "403 Access Denied"
+		status.StatusName = "AccessDenied"
 	// ルーティングテーブルから、クエリパスに該当するアクションが見つからない
 	case *router.NotRoutes:
 		status.Title = "404 Not Found"
@@ -765,7 +797,6 @@ func (mux *Mux) Error(err error, res http.ResponseWriter, req *http.Request) {
 		status.ErrorTitle = "An error occurred in post processing '" + req.URL.Path + "'"
 	// 上記以外のエラー
 	default:
-		mux.Log.Debug("")
 		res.Header().Set("Content-Type", "text/html")
 		res.WriteHeader(500)
 		res.Write([]byte(err.Error()))

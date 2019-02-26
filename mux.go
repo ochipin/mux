@@ -748,6 +748,13 @@ func (mux *Mux) Error(err error, res http.ResponseWriter, req *http.Request) {
 		status.StatusCode = 503
 		status.StatusName = "MaxClientsOver"
 		status.ErrorTitle = "Max Clients Over in '" + execname + "'"
+	// 401 認証エラー
+	case *Unauthorized:
+		status.Title = "401 Unauthorized"
+		status.StatusCode = types.StatusCode
+		status.StatusName = "Unauthorized"
+		status.ErrorTitle = "401 Unauthorized in '" + execname + "'"
+		res.Header().Add("WWW-Authenticate", `Basic realm="`+types.Title+`"`)
 	// コントローラから InternalError が返却された場合
 	case *InternalError:
 		status.Title = "500 Internal Server Error"

@@ -114,3 +114,16 @@ type AccessDenied struct {
 func (err *AccessDenied) Error() string {
 	return err.Message
 }
+
+// Unauthorized : 401 Unauthorized エラー
+type Unauthorized struct {
+	Message    string
+	Title      string
+	StatusCode int
+}
+
+func (err *Unauthorized) Error() string {
+	return err.Message
+}
+
+func (err *Unauthorized) pointer() {}

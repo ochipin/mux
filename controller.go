@@ -91,6 +91,20 @@ func (c *Controller) Redirect(i ...interface{}) *Redirect {
 	}
 }
 
+// BasicAuth : ベーシック認証を実装する
+func (c *Controller) BasicAuth() (string, string, bool) {
+	return c.r.BasicAuth()
+}
+
+// Unauthorized : 401 認証エラー
+func (c *Controller) Unauthorized(title string) *Unauthorized {
+	return &Unauthorized{
+		Message:    "401 Unauthorized",
+		Title:      title,
+		StatusCode: 401,
+	}
+}
+
 // InternalError : 500 InternalServerError を発生させる
 func (c *Controller) InternalError(message string, i ...interface{}) *InternalError {
 	// トレース情報を取得

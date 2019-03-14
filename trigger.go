@@ -13,6 +13,7 @@ type Trigger interface {
 	Commit(http.ResponseWriter, *http.Request, *Values) error
 	SetController(reflect.Value, *Values)
 	SetHelper(*helpers.Helpers) interface{}
+	CustomError(*ErrorStatus, error, string) bool
 	ErrorReport(err error, code int, status string)
 }
 
@@ -30,6 +31,9 @@ func (t BaseTrigger) SetController(elem reflect.Value, v *Values) {}
 
 // SetHelper : 独自ヘルパを登録するトリガ
 func (t BaseTrigger) SetHelper(helpers *helpers.Helpers) interface{} { return helpers }
+
+// CustomError : 2xx 以外のエラー発生時にコールされるトリガ
+func (t BaseTrigger) CustomError(status *ErrorStatus, err error, execname string) bool { return false }
 
 // ErrorReport : 2xx 以外のエラー発生時にコールされるトリガ
 func (t BaseTrigger) ErrorReport(err error, code int, status string) {}

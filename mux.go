@@ -754,6 +754,7 @@ func (mux *Mux) Error(err error, res http.ResponseWriter, req *http.Request) {
 		status.StatusCode = types.StatusCode
 		status.StatusName = "Unauthorized"
 		status.ErrorTitle = "401 Unauthorized in '" + execname + "'"
+		status.Interface = types.Data
 		res.Header().Add("WWW-Authenticate", `Basic realm="`+types.Title+`"`)
 	// コントローラから InternalError が返却された場合
 	case *InternalError:
@@ -804,10 +805,12 @@ func (mux *Mux) Error(err error, res http.ResponseWriter, req *http.Request) {
 		status.ErrorTitle = "An error occurred in post processing '" + req.URL.Path + "'"
 	// 上記以外のエラー
 	default:
-		res.Header().Set("Content-Type", "text/html")
-		res.WriteHeader(500)
-		res.Write([]byte(err.Error()))
-		return
+		if mux.Trigger.CustomError(status, err, execname) == false {
+			res.Header().Set("Content-Type", "text/html")
+			res.WriteHeader(500)
+			res.Write([]byte(err.Error()))
+			return
+		}
 	}
 
 	mux.Log.Debugf("status name is '%s'", status.StatusName)

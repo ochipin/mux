@@ -120,6 +120,7 @@ type Unauthorized struct {
 	Message    string
 	Title      string
 	StatusCode int
+	Data       interface{}
 }
 
 func (err *Unauthorized) Error() string {

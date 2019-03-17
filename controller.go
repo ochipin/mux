@@ -49,6 +49,11 @@ type Controller struct {
 // PrePostRegister : アクション実行前の事前、事後実行関数を登録する初期化関数
 func (c *Controller) PrePostRegister(prepost *PrePost) {}
 
+// Req : リクエスト情報を返却する
+func (c *Controller) Req() *http.Request {
+	return c.r
+}
+
 // Form : 入力フォームから得た情報を返却する
 func (c *Controller) Form() url.Values {
 	return c.r.PostForm

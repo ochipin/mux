@@ -99,7 +99,6 @@ func (v FormValues) Copy(i interface{}) error {
 			if err != nil {
 				return err
 			}
-			fmt.Println(v.Interface())
 			val.Field(i).Set(v)
 		}
 	}

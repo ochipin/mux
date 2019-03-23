@@ -3,7 +3,6 @@ package mux
 import (
 	"fmt"
 	"net/http"
-	"net/url"
 	"runtime"
 	"strings"
 
@@ -55,13 +54,13 @@ func (c *Controller) Req() *http.Request {
 }
 
 // Form : 入力フォームから得た情報を返却する
-func (c *Controller) Form() url.Values {
-	return c.r.PostForm
+func (c *Controller) Form() FormValues {
+	return FormValues(c.r.PostForm)
 }
 
 // Query : クエリパラメータの情報を返却する
-func (c *Controller) Query() url.Values {
-	return c.r.URL.Query()
+func (c *Controller) Query() FormValues {
+	return FormValues(c.r.URL.Query())
 }
 
 // I18n : 言語設定パラメータの値を取得する

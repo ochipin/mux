@@ -503,7 +503,7 @@ func (mux *Mux) I18n(r *http.Request, ctlname, actname string) locale.Data {
 	mux.Log.Debug("END")
 	// l1 + l2 のマージした情報を返却する
 	mergedata := locale.Merge(l1, l2)
-	if mergedata != nil {
+	if mergedata == nil {
 		mergedata = make(locale.Data)
 	}
 	return mergedata
